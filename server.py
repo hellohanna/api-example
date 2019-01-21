@@ -14,6 +14,8 @@ def hello_world():
 
 @app.route('/data', methods = ['POST'])
 def post_data():
+    """Creates new record in db"""
+
     if not request.json:
         return 'json body is expected', 400
 
@@ -28,12 +30,13 @@ def post_data():
     id = cursor.fetchone()
     db.session.commit()
 
-    print('created new record', id)
     return jsonify(id[0]), 201
 
 
 @app.route('/data/<id>', methods = ['GET'])
 def get_data(id):
+    """Returns name from db by id"""
+
     if not id or not id.isdigit():
         return 'integer ID expected', 400
 
@@ -41,14 +44,15 @@ def get_data(id):
     cursor = db.session.execute(sql, {"id": id})
     data = cursor.fetchone()
     if not data:
-        return 'not found', 401
+        return 'not found', 404
 
-    print('return data:', data)
-    return 'data', 200
+    return jsonify(data[0]), 200
 
 
-@app.route('/delete/<id>', methods = ['DELETE'])
+@app.route('/data/<id>', methods = ['DELETE'])
 def delete_data(id):
+    """Delete name from db by id"""
+
     if not id or not id.isdigit():
         return 'integer ID expected', 400
 
@@ -62,12 +66,13 @@ def delete_data(id):
     db.session.execute(sql, {"id": id})
     db.session.commit()
     
-    print('data deleted')
     return 'data deleted', 200
 
 
-@app.route('/change/<id>', methods = ['PUT'])
+@app.route('/data/<id>', methods = ['PUT'])
 def put_data(id):
+    """Changes name in db by id"""
+
     if not request.json:
         return 'json body is expected', 400
 
@@ -85,14 +90,13 @@ def put_data(id):
     cursor = db.session.execute(sql, {"name": data['name'], "id": id})
     db.session.commit()
 
-    print('data changed:', data['name'])
     return 'data changed', 200
 
 
 def connect_to_db(app, database_uri="postgresql:///sampledb"):
-    """Connect the database to our Flask app."""
+    """Connect the database to Flask app."""
 
-    # Configure to use our PostgreSQL database
+    # Configure to use PostgreSQL database
     app.config['SQLALCHEMY_DATABASE_URI'] = database_uri
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.app = app
